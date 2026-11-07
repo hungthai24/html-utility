@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4D Object Duplicate Tracker</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-between p-4 sm:p-8">
+
+    <div class="w-full max-w-3xl bg-slate-800 border border-slate-700 shadow-2xl rounded-2xl p-6 sm:p-8 my-auto">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-700 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                    <span class="bg-indigo-600 text-xs px-2.5 py-1 rounded-full font-mono uppercase">4D Tracker</span>
+                    Persistent Duplication Engine
+                </h1>
+                <p class="text-sm text-slate-400 mt-1">Tracks 4-integer tuples with instant $O(1)$ lookups and <code class="text-indigo-400 bg-slate-900 px-1 py-0.5 rounded">localStorage</code> durability.</p>
+            </div>
+            <button id="clearBtn" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-md self-start sm:self-auto">
+                Clear All Storage
+            </button>
+        </div>
+
+        <!-- Input Form -->
+        <form id="trackerForm" class="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6">
+            <div class="flex flex-col">
+                <label class="text-xs font-medium text-slate-400 mb-1">Value A (w)</label>
+                <input type="number" id="valA" required class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-indigo-500" placeholder="e.g. 1">
+            </div>
+            <div class="flex flex-col">
+                <label class="text-xs font-medium text-slate-400 mb-1">Value B (x)</label>
+                <input type="number" id="valB" required class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-indigo-500" placeholder="e.g. 2">
+            </div>
+            <div class="flex flex-col">
+                <label class="text-xs font-medium text-slate-400 mb-1">Value C (y)</label>
+                <input type="number" id="valC" required class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-indigo-500" placeholder="e.g. 3">
+            </div>
+            <div class="flex flex-col">
+                <label class="text-xs font-medium text-slate-400 mb-1">Value D (z)</label>
+                <input type="number" id="valD" required class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-indigo-500" placeholder="e.g. 4">
+            </div>
+            <div class="col-span-2 sm:col-span-1 flex items-end">
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg transition shadow-md">
+                    Check / Add
+                </button>
+            </div>
+        </form>
+
+        <!-- Status Alert Banner -->
+        <div id="alertBox" class="hidden mt-6 p-4 rounded-xl text-sm font-medium border transition-all"></div>
+
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-2 gap-4 mt-6">
+            <div class="bg-slate-900/50 border border-slate-700/60 p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Total Stored</div>
+                    <div id="totalCount" class="text-2xl font-bold font-mono text-indigo-400 mt-0.5">0</div>
+                </div>
+                <div class="h-8 w-8 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold">∑</div>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-700/60 p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Storage Key</div>
+                    <div class="text-xs font-mono text-slate-300 mt-1 truncate max-w-[150px] sm:max-w-[200px]" title="fourD_objects_store">fourD_objects_store</div>
+                </div>
+                <div class="h-8 w-8 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">✓</div>
+            </div>
+        </div>
+
+        <!-- Stored Items Table View -->
+        <div class="mt-6">
+            <h3 class="text-sm font-semibold text-slate-300 mb-3">Recently Encountered Objects</h3>
+            <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead class="bg-slate-800/80 sticky top-0 text-slate-400 border-b border-slate-700 text-xs font-mono uppercase">
+                        <tr>
+                            <th class="p-3">#</th>
+                            <th class="p-3">Tuple Coordinates [A, B, C, D]</th>
+                            <th class="p-3 text-right">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsTableBody" class="divide-y divide-slate-800 font-mono text-xs">
+                        <tr>
+                            <td colspan="3" class="p-4 text-center text-slate-500 italic font-sans">No 4D items stored yet. Try adding one above!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-xs text-slate-500 mt-6">
+        Hosted with GitHub Pages • Powered by Vanilla JS & Tailwind CSS
+    </footer>
+
+    <!-- Core Logic Script -->
+    <script>
+        class FourDTracker {
+            constructor(storageKey = 'fourD_objects_store') {
+                this.storageKey = storageKey;
+                const savedData = localStorage.getItem(this.storageKey);
+                this.itemsArray = savedData ? JSON.parse(savedData) : [];
+                this.seenSet = new Set(this.itemsArray);
+            }
+
+            _toKey(obj) {
+                let a, b, c, d;
+                if (Array.isArray(obj)) {
+                    [a, b, c, d] = obj;
+                } else {
+                    a = obj.a ?? obj[0];
+                    b = obj.b ?? obj[1];
+                    c = obj.c ?? obj[2];
+                    d = obj.d ?? obj[3];
+                }
+                return `${Number(a)},${Number(b)},${Number(c)},${Number(d)}`;
+            }
+
+            has(obj) {
+                return this.seenSet.has(this._toKey(obj));
+            }
+
+            add(obj) {
+                const key = this._toKey(obj);
+                if (this.seenSet.has(key)) {
+                    return false; // Duplicate
+                }
+                this.seenSet.add(key);
+                this.itemsArray.push(key);
+                this._save();
+                return true; // Newly added
+            }
+
+            _save() {
+                localStorage.setItem(this.storageKey, JSON.stringify(this.itemsArray));
+            }
+
+            getAll() {
+                return this.itemsArray.map(key => key.split(',').map(Number));
+            }
+
+            clear() {
+                this.seenSet.clear();
+                this.itemsArray = [];
+                localStorage.removeItem(this.storageKey);
+            }
+        }
+
+        // Initialize Tracker
+        const tracker = new FourDTracker('fourD_objects_store');
+
+        // UI Binding Elements
+        const form = document.getElementById('trackerForm');
+        const alertBox = document.getElementById('alertBox');
+        const totalCount = document.getElementById('totalCount');
+        const itemsTableBody = document.getElementById('itemsTableBody');
+        const clearBtn = document.getElementById('clearBtn');
+
+        function updateUI(statusMessage = null, isDuplicate = false) {
+            const items = tracker.getAll();
+            totalCount.textContent = items.length;
+
+            // Render table
+            if (items.length === 0) {
+                itemsTableBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-500 italic font-sans">No 4D items stored yet. Try adding one above!</td></tr>`;
+            } else {
+                itemsTableBody.innerHTML = items.slice().reverse().map((item, index) => `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="p-3 text-slate-500">${items.length - index}</td>
+                        <td class="p-3 text-indigo-300 font-semibold">[ ${item.join(', ')} ]</td>
+                        <td class="p-3 text-right">
+                            <span class="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded text-[10px]">Stored</span>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // Render Alert Banner
+            if (statusMessage) {
+                alertBox.classList.remove('hidden');
+                if (isDuplicate) {
+                    alertBox.className = "mt-6 p-4 rounded-xl text-sm font-medium border bg-amber-500/10 border-amber-500/30 text-amber-300";
+                    alertBox.innerHTML = `<strong>⚠️ Duplicate Encountered!</strong> ${statusMessage} already exists in storage.`;
+                } else {
+                    alertBox.className = "mt-6 p-4 rounded-xl text-sm font-medium border bg-emerald-500/10 border-emerald-500/30 text-emerald-300";
+                    alertBox.innerHTML = `<strong>✨ Successfully Tracked!</strong> ${statusMessage} has been newly saved and persisted.`;
+                }
+            } else {
+                alertBox.classList.add('hidden');
+            }
+        }
+
+        // Form Submit Event Handler
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const a = document.getElementById('valA').value;
+            const b = document.getElementById('valB').value;
+            const c = document.getElementById('valC').value;
+            const d = document.getElementById('valD').value;
+
+            const tuple = [a, b, c, d];
+            const tupleString = `[${tuple.join(', ')}]`;
+
+            const isNew = tracker.add(tuple);
+            updateUI(tupleString, !isNew);
+
+            // Optional: reset input values for quick successive testing
+            // form.reset();
+        });
+
+        // Clear Storage Handler
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to wipe all tracked 4D objects from localStorage?')) {
+                tracker.clear();
+                updateUI();
+                alertBox.classList.add('hidden');
+            }
+        });
+
+        // Initial render on page load
+        updateUI();
+    </script>
+</body>
+</html>

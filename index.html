@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utility Hub & Index</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-between p-4 sm:p-8">
+
+    <div class="w-full max-w-4xl mx-auto my-auto py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-10">
+            <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs px-3 py-1 rounded-full font-mono uppercase tracking-wider">GitHub Pages Hub</span>
+            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mt-4">Utility Dashboard</h1>
+            <p class="text-slate-400 mt-2 max-w-xl mx-auto text-sm sm:text-base">
+                A centralized index for your custom web tools, scripts, and local data trackers.
+            </p>
+        </div>
+
+        <!-- Utility Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            
+            <!-- Utility Card 1: 4D Tracker -->
+            <a href="4d-tracker.html" class="group bg-slate-800/80 border border-slate-700/80 hover:border-indigo-500/50 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="h-10 w-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center font-bold text-lg group-hover:scale-110 transition-transform">
+                            4D
+                        </div>
+                        <span class="text-xs font-mono text-slate-500 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-700/50">localStorage</span>
+                    </div>
+                    <h2 class="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors">4D Object Duplicate Tracker</h2>
+                    <p class="text-sm text-slate-400 mt-2">
+                        Tracks 4-integer tuples with instant $O(1)$ lookups, visual stats, and persistent storage across browser sessions.
+                    </p>
+                </div>
+                <div class="mt-6 flex items-center text-xs font-semibold text-indigo-400 group-hover:translate-x-1 transition-transform">
+                    Launch Utility &rarr;
+                </div>
+            </a>
+
+            <!-- Placeholder Card for Future Utilities (Template) -->
+            <div class="bg-slate-800/30 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between opacity-60 border-dashed">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="h-10 w-10 rounded-xl bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-lg">
+                            +
+                        </div>
+                        <span class="text-xs font-mono text-slate-600 px-2.5 py-1 rounded-lg">Coming Soon</span>
+                    </div>
+                    <h2 class="text-lg font-bold text-slate-400">Future Utility Tool</h2>
+                    <p class="text-sm text-slate-500 mt-2">
+                        Ready for your next script, calculator, or dashboard component. Drop a new HTML file in your repository to link it here.
+                    </p>
+                </div>
+                <div class="mt-6 text-xs text-slate-600 font-semibold">
+                    Placeholder Slot
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-xs text-slate-500 mt-8">
+        Hosted with GitHub Pages • Tailored for Quick Access
+    </footer>
+
+</body>
+</html>
