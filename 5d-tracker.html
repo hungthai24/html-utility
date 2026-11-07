@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5D Object Duplicate Tracker (4 Ints + Text)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-between p-4 sm:p-8">
+
+    <div class="w-full max-w-4xl bg-slate-800 border border-slate-700 shadow-2xl rounded-2xl p-6 sm:p-8 my-auto">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-700 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                    <span class="bg-purple-600 text-xs px-2.5 py-1 rounded-full font-mono uppercase">5D Tracker</span>
+                    Integer + Text Duplication Engine
+                </h1>
+                <p class="text-sm text-slate-400 mt-1">Tracks 4 integers & 1 uppercase text tag with $O(1)$ lookups and persistent storage.</p>
+            </div>
+            <button id="clearBtn" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-md self-start sm:self-auto">
+                Clear All Storage
+            </button>
+        </div>
+
+        <!-- Input Form -->
+        <form id="trackerForm" class="grid grid-cols-2 sm:grid-cols-6 gap-3 mt-6">
+            <div class="flex flex-col">
+                <label class="text-xs font-medium text-slate-400 mb-1">Value A (Int)</label>
+                <input type="number" id="valA" required class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-purple-500" placeholder="1">
+            </div>
+            <div class="flex flex-col">
+                <label class="text-xs font-medium text-slate-400 mb-1">Value B (Int)</label>
+                <input type="number" id="valB" required class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-purple-500" placeholder="2">
+            </div>
+            <div class="flex flex-col">
+                <label class="text-xs font-medium text-slate-400 mb-1">Value C (Int)</label>
+                <input type="number" id="valC" required class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-purple-500" placeholder="3">
+            </div>
+            <div class="flex flex-col">
+                <label class="text-xs font-medium text-slate-400 mb-1">Value D (Int)</label>
+                <input type="number" id="valD" required class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-purple-500" placeholder="4">
+            </div>
+            <div class="col-span-2 sm:col-span-2 flex flex-col">
+                <label class="text-xs font-medium text-slate-400 mb-1">Dimension E (Text / Uppercased)</label>
+                <div class="flex gap-2">
+                    <input type="text" id="valE" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono uppercase focus:outline-none focus:border-purple-500" placeholder="e.g. ACTIVE">
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2 px-4 rounded-lg transition shadow-md whitespace-nowrap">
+                        Check / Add
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Status Alert Banner -->
+        <div id="alertBox" class="hidden mt-6 p-4 rounded-xl text-sm font-medium border transition-all"></div>
+
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-2 gap-4 mt-6">
+            <div class="bg-slate-900/50 border border-slate-700/60 p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Total Stored 5D Tuples</div>
+                    <div id="totalCount" class="text-2xl font-bold font-mono text-purple-400 mt-0.5">0</div>
+                </div>
+                <div class="h-8 w-8 rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold">∑</div>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-700/60 p-4 rounded-xl flex items-center justify-between">
+                <div>
+                    <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Storage Status</div>
+                    <div id="storageStatusText" class="text-xs font-mono text-emerald-400 mt-1 truncate">localStorage Active</div>
+                </div>
+                <div class="h-8 w-8 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">✓</div>
+            </div>
+        </div>
+
+        <!-- Stored Items Table View -->
+        <div class="mt-6">
+            <h3 class="text-sm font-semibold text-slate-300 mb-3">Encountered 5D Objects [Int, Int, Int, Int, TEXT]</h3>
+            <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead class="bg-slate-800/80 sticky top-0 text-slate-400 border-b border-slate-700 text-xs font-mono uppercase">
+                        <tr>
+                            <th class="p-3">#</th>
+                            <th class="p-3">5D Tuple Structure</th>
+                            <th class="p-3 text-right">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsTableBody" class="divide-y divide-slate-800 font-mono text-xs">
+                        <tr>
+                            <td colspan="3" class="p-4 text-center text-slate-500 italic font-sans">No 5D items stored yet. Try adding one above!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-xs text-slate-500 mt-6">
+        Hosted via GitHub Pages / Local Static • 5D Duplicate Tracking Engine
+    </footer>
+
+    <!-- Core Logic Script with Safe Storage Handling -->
+    <script>
+        class FiveDTracker {
+            constructor(storageKey = 'fiveD_objects_store_v2') {
+                this.storageKey = storageKey;
+                this.itemsArray = [];
+                this.seenSet = new Set();
+                this.isStorageWorking = true;
+
+                this._load();
+            }
+
+            _load() {
+                try {
+                    const savedData = localStorage.getItem(this.storageKey);
+                    if (savedData) {
+                        this.itemsArray = JSON.parse(savedData);
+                        this.seenSet = new Set(this.itemsArray);
+                    }
+                } catch (e) {
+                    console.warn('localStorage read failed, falling back to in-memory store:', e);
+                    this.isStorageWorking = false;
+                    document.getElementById('storageStatusText').textContent = 'In-Memory Mode (Storage Restricted)';
+                    document.getElementById('storageStatusText').className = 'text-xs font-mono text-amber-400 mt-1 truncate';
+                }
+            }
+
+            _toKey(obj) {
+                let a, b, c, d, e;
+                if (Array.isArray(obj)) {
+                    [a, b, c, d, e] = obj;
+                } else {
+                    a = obj.a ?? obj[0];
+                    b = obj.b ?? obj[1];
+                    c = obj.c ?? obj[2];
+                    d = obj.d ?? obj[3];
+                    e = obj.e ?? obj[4];
+                }
+                const normalizedText = String(e || '').trim().toUpperCase();
+                return `${Number(a)},${Number(b)},${Number(c)},${Number(d)},${normalizedText}`;
+            }
+
+            has(obj) {
+                return this.seenSet.has(this._toKey(obj));
+            }
+
+            add(obj) {
+                const key = this._toKey(obj);
+                if (this.seenSet.has(key)) {
+                    return false; // Duplicate
+                }
+                this.seenSet.add(key);
+                this.itemsArray.push(key);
+                this._save();
+                return true; // Added successfully
+            }
+
+            _save() {
+                if (!this.isStorageWorking) return;
+                try {
+                    localStorage.setItem(this.storageKey, JSON.stringify(this.itemsArray));
+                } catch (e) {
+                    console.error('localStorage write failed:', e);
+                    this.isStorageWorking = false;
+                }
+            }
+
+            getAll() {
+                return this.itemsArray.map(key => {
+                    const lastCommaIndex = key.lastIndexOf(',');
+                    const coordsPart = key.substring(0, lastCommaIndex);
+                    const textPart = key.substring(lastCommaIndex + 1);
+                    const coords = coordsPart.split(',').map(Number);
+                    return [coords[0], coords[1], coords[2], coords[3], textPart];
+                });
+            }
+
+            clear() {
+                this.seenSet.clear();
+                this.itemsArray = [];
+                try {
+                    localStorage.removeItem(this.storageKey);
+                } catch (e) {
+                    console.error('localStorage clear failed:', e);
+                }
+            }
+        }
+
+        // Initialize Tracker
+        const tracker = new FiveDTracker('fiveD_objects_store_v2');
+
+        // UI Binding Elements
+        const form = document.getElementById('trackerForm');
+        const alertBox = document.getElementById('alertBox');
+        const totalCount = document.getElementById('totalCount');
+        const itemsTableBody = document.getElementById('itemsTableBody');
+        const clearBtn = document.getElementById('clearBtn');
+        const valEInput = document.getElementById('valE');
+
+        // Force input field to uppercase dynamically
+        valEInput.addEventListener('input', (e) => {
+            const start = e.target.selectionStart;
+            const end = e.target.selectionEnd;
+            e.target.value = e.target.value.toUpperCase();
+            e.target.setSelectionRange(start, end);
+        });
+
+        function updateUI(statusMessage = null, isDuplicate = false) {
+            const items = tracker.getAll();
+            totalCount.textContent = items.length;
+
+            if (items.length === 0) {
+                itemsTableBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-500 italic font-sans">No 5D items stored yet. Try adding one above!</td></tr>`;
+            } else {
+                itemsTableBody.innerHTML = items.slice().reverse().map((item, index) => {
+                    const formattedTuple = `[ ${item[0]}, ${item[1]}, ${item[2]}, ${item[3]}, <span class="text-purple-300 font-bold">"${item[4]}"</span> ]`;
+                    return `
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="p-3 text-slate-500">${items.length - index}</td>
+                            <td class="p-3 text-slate-200">${formattedTuple}</td>
+                            <td class="p-3 text-right">
+                                <span class="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded text-[10px]">Saved</span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            if (statusMessage) {
+                alertBox.classList.remove('hidden');
+                if (isDuplicate) {
+                    alertBox.className = "mt-6 p-4 rounded-xl text-sm font-medium border bg-amber-500/10 border-amber-500/30 text-amber-300";
+                    alertBox.innerHTML = `<strong>⚠️ Duplicate 5D Object!</strong> Combination ${statusMessage} has already been recorded.`;
+                } else {
+                    alertBox.className = "mt-6 p-4 rounded-xl text-sm font-medium border bg-emerald-500/10 border-emerald-500/30 text-emerald-300";
+                    alertBox.innerHTML = `<strong>✨ Successfully Tracked!</strong> New 5D tuple ${statusMessage} saved and persisted.`;
+                }
+            } else {
+                alertBox.classList.add('hidden');
+            }
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const a = document.getElementById('valA').value;
+            const b = document.getElementById('valB').value;
+            const c = document.getElementById('valC').value;
+            const d = document.getElementById('valD').value;
+            const eText = valEInput.value;
+
+            if (a === '' || b === '' || c === '' || d === '' || !eText) return;
+
+            const tuple = [a, b, c, d, eText];
+            const tupleString = `[${a}, ${b}, ${c}, ${d}, "${eText.trim().toUpperCase()}"]`;
+
+            const isNew = tracker.add(tuple);
+            updateUI(tupleString, !isNew);
+        });
+
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to wipe all tracked 5D objects from storage?')) {
+                tracker.clear();
+                updateUI();
+                alertBox.classList.add('hidden');
+            }
+        });
+
+        // Initial render load check
+        updateUI();
+    </script>
+</body>
+</html>
